@@ -10,11 +10,9 @@ export const selectUser = async (username: string, password: string) => {
                 where: { username: username, password: password },
             });
             if (userItem) {
-                console.log(111);
                 const u_id = userItem.u_id;
                 flag = { message: "登陆成功", code: 200, U_id: u_id };
             } else {
-                console.log(222);
                 flag = { message: "登入失败", code: 201, U_id: undefined };
             }
         })
