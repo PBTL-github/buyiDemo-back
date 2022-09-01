@@ -15,10 +15,19 @@ export const selectUser = async (username: string, password: string) => {
       });
       if (userItem) {
         const uuid = userItem.uuid;
-        const token = sign({ username, password }, secret, { expiresIn: "1h" });
-        userItem.token = token;
+        if (!userItem.token) {
+          const token = sign({ username, password }, secret, {
+            expiresIn: "1h",
+          });
+          userItem.token = token;
+        }
         await UserRepository.save(userItem);
-        msg = { message: "登陆成功", code: 200, uuid: uuid, token: token };
+        msg = {
+          message: "登陆成功",
+          code: 200,
+          uuid: uuid,
+          token: userItem.token,
+        };
       } else {
         msg = {
           message: "登入失败",
