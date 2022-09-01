@@ -1,5 +1,8 @@
 import { AppDataSource } from "../../orm/data-source";
 import { User } from "../../orm/entity/User";
+import { sign } from "jsonwebtoken";
+import * as KoaJwt from "koa-jwt";
+import secret from "./secret";
 
 const UserRepository = AppDataSource.getRepository(User);
 //查询
@@ -12,9 +15,17 @@ export const selectUser = async (username: string, password: string) => {
       });
       if (userItem) {
         const uuid = userItem.uuid;
-        msg = { message: "登陆成功", code: 200, uuid: uuid };
+        const token = sign({ username, password }, secret, { expiresIn: "1h" });
+        userItem.token = token;
+        await UserRepository.save(userItem);
+        msg = { message: "登陆成功", code: 200, uuid: uuid, token: token };
       } else {
-        msg = { message: "登入失败", code: 201, uuid: undefined };
+        msg = {
+          message: "登入失败",
+          code: 201,
+          uuid: undefined,
+          token: undefined,
+        };
       }
     })
     .catch((error) => console.log(error));
@@ -38,9 +49,19 @@ export const createUser = async (username: string, password: string) => {
         user.username = username;
         user.password = password;
         await UserRepository.save(user);
-        msg = { message: "注册成功", code: 200, uuid: undefined };
+        msg = {
+          message: "注册成功",
+          code: 200,
+          uuid: undefined,
+          token: undefined,
+        };
       } else {
-        msg = { message: "用户已存在", code: 201, uuid: undefined };
+        msg = {
+          message: "用户已存在",
+          code: 201,
+          uuid: undefined,
+          token: undefined,
+        };
       }
     })
     .catch((error) => console.log(error));
