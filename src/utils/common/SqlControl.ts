@@ -1,8 +1,8 @@
 import { AppDataSource } from "../../orm/data-source";
 import { User } from "../../orm/entity/User";
-import { sign } from "jsonwebtoken";
 import * as KoaJwt from "koa-jwt";
-import secret from "./secret";
+import { secret } from "./config";
+import { generateToken } from "./utils";
 
 const UserRepository = AppDataSource.getRepository(User);
 //查询
@@ -15,12 +15,8 @@ export const selectUser = async (username: string, password: string) => {
       });
       if (userItem) {
         const uuid = userItem.uuid;
-        if (!userItem.token) {
-          const token = sign({ username, password }, secret, {
-            expiresIn: "1h",
-          });
-          userItem.token = token;
-        }
+        const token = generateToken(uuid);
+        userItem.token = token;
         await UserRepository.save(userItem);
         msg = {
           message: "登陆成功",

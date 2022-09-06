@@ -1,10 +1,12 @@
-import { checkToken } from "./common/checkToken";
+import { createSecretKey } from "crypto";
+import { Auth } from "./common/Auth";
 
 export const allowToken = async (ctx: any) => {
-  const { token } = ctx.request.body;
-  if (token) {
-    const res = await checkToken(token);
-    ctx.body = res;
-  }
+  const token = ctx.request.body.token;
+  const isValid = Auth.verifyToken(token);
+  ctx.body = {
+    isValid: isValid,
+  };
+
   return ctx.body;
 };
